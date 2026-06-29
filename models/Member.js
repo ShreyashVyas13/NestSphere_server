@@ -16,9 +16,11 @@ const memberSchema = new mongoose.Schema(
       trim: true,
     },
 
-    phone: {
+    mobile: {
       type: String,
       required: true,
+      unique: true,
+      trim: true,
     },
 
     gender: {
@@ -31,33 +33,46 @@ const memberSchema = new mongoose.Schema(
       type: Date,
     },
 
-    block: {
-      type: String,
-      required: true,
-    },
-
-    flatNumber: {
-      type: String,
+    flat: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Flat",
       required: true,
     },
 
     memberType: {
       type: String,
-      enum: ["Owner", "Tenant", "Family"],
+      enum: [
+        "Owner",
+        "Tenant",
+        "Family Member",
+        "Committee Member",
+      ],
       default: "Owner",
     },
 
     occupation: {
       type: String,
+      trim: true,
     },
 
-    profileImage: {
+    aadhaarNumber: {
       type: String,
-      default: "",
+      trim: true,
     },
 
     emergencyContact: {
       type: String,
+      trim: true,
+    },
+
+    address: {
+      type: String,
+      trim: true,
+    },
+
+    profilePhoto: {
+      type: String,
+      default: "",
     },
 
     status: {
@@ -71,4 +86,7 @@ const memberSchema = new mongoose.Schema(
   }
 );
 
-module.exports = mongoose.model("Member", memberSchema);
+module.exports = mongoose.model(
+  "Member",
+  memberSchema
+);
