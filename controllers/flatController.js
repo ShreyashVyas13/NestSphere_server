@@ -34,7 +34,45 @@ const getFlats = async (req, res) => {
   }
 };
 
+const updateFlat = async (req, res) => {
+  try {
+    const flat = await flatService.updateFlat(
+      req.params.id,
+      req.body
+    );
+
+    res.status(200).json({
+      success: true,
+      message: "Flat updated successfully.",
+      data: flat,
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+const deleteFlat = async (req, res) => {
+  try {
+    await flatService.deleteFlat(req.params.id);
+
+    res.status(200).json({
+      success: true,
+      message: "Flat deleted successfully.",
+    });
+  } catch (error) {
+    res.status(400).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
 module.exports = {
   addFlat,
   getFlats,
+  updateFlat,
+  deleteFlat,
 };

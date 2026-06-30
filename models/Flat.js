@@ -37,12 +37,6 @@ const flatSchema = new mongoose.Schema(
       enum: ["Vacant", "Occupied"],
       default: "Vacant",
     },
-
-    owner: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Member",
-      default: null,
-    },
   },
   {
     timestamps: true,
