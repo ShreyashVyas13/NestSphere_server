@@ -11,7 +11,10 @@ const createFlat = async (flatData) => {
     throw new Error("Flat already exists in this block.");
   }
 
-  return await Flat.create(flatData);
+  return await Flat.create({
+    ...flatData,
+    status: "Vacant",
+  });
 };
 
 const getAllFlats = async () => {
@@ -68,19 +71,13 @@ const updateFlat = async (id, flatData) => {
   });
 
   if (duplicateFlat) {
-    throw new Error(
-      "Flat already exists in this block."
-    );
+    throw new Error("Flat already exists in this block.");
   }
 
-  return await Flat.findByIdAndUpdate(
-    id,
-    flatData,
-    {
-      new: true,
-      runValidators: true,
-    }
-  );
+  return await Flat.findByIdAndUpdate(id, flatData, {
+    new: true,
+    runValidators: true,
+  });
 };
 
 const deleteFlat = async (id) => {
@@ -96,7 +93,7 @@ const deleteFlat = async (id) => {
 
   if (member) {
     throw new Error(
-      `${member.fullName} is assigned to this flat. Remove the member first.`
+      `${member.fullName} is assigned to this flat. Remove the member first.`,
     );
   }
 

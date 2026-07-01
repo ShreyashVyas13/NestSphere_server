@@ -26,45 +26,92 @@ const createMember = async (memberData) => {
 
   const member = await Member.create(memberData);
 
+  await Flat.findByIdAndUpdate(memberData.flat, {
+    status: "Occupied",
+  });
+
   return member;
 };
 
 const getAllMembers = async () => {
-  return await Member.find()
-    .populate("flat")
-    .sort({ createdAt: -1 });
+  return await Member.find().populate("flat").sort({ createdAt: -1 });
 };
 
-const updateMember = async (
-  id,
-  memberData
-) => {
-  const member =
-    await Member.findById(id);
+const updateMember = async (id, memberData) => {
+  const member = await Member.findById(id);
 
   if (!member) {
     throw new Error("Member not found.");
   }
 
-  return await Member.findByIdAndUpdate(
-    id,
-    memberData,
-    {
-      new: true,
-      runValidators: true,
+  // Email duplicate check
+  const existingEmail = await Member.findOne({
+    email: memberData.email,
+    _id: { $ne: id },
+  });
+
+  if (existingEmail) {
+    throw new Error("Email already exists.");
+  }
+
+  // Mobile duplicate check
+  const existingMobile = await Member.findOne({
+    mobile: memberData.mobile,
+    _id: { $ne: id },
+  });
+
+  if (existingMobile) {
+    throw new Error("Mobile number already exists.");
+  }
+
+  const oldFlatId = member.flat?.toString();
+  const newFlatId = memberData.flat;
+
+  // Update member
+  const updatedMember = await Member.findByIdAndUpdate(id, memberData, {
+    new: true,
+    runValidators: true,
+  }).populate("flat");
+
+  // Flat changed
+  if (oldFlatId !== newFlatId) {
+    // New flat occupied
+    await Flat.findByIdAndUpdate(newFlatId, {
+      status: "Occupied",
+    });
+
+    // Check old flat
+    const remainingMembers = await Member.countDocuments({
+      flat: oldFlatId,
+    });
+
+    if (remainingMembers === 0) {
+      await Flat.findByIdAndUpdate(oldFlatId, {
+        status: "Vacant",
+      });
     }
-  ).populate("flat");
+  }
+
+  return updatedMember;
 };
 
 const deleteMember = async (id) => {
-  const member =
-    await Member.findById(id);
+  const member = await Member.findById(id);
 
   if (!member) {
     throw new Error("Member not found.");
   }
 
   await Member.findByIdAndDelete(id);
+  const remainingMembers = await Member.countDocuments({
+    flat: member.flat,
+  });
+
+  if (remainingMembers === 0) {
+    await Flat.findByIdAndUpdate(member.flat, {
+      status: "Vacant",
+    });
+  }
 
   return;
 };
